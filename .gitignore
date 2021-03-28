@@ -1,9 +1,18 @@
+# Serverless
+.serverless
+bin
+*.pyc
+*.pyo
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+
+# Develop
+node_modules/
 
 # Test binary, built with `go test -c`
 *.test
@@ -12,4 +21,7 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
+
+# SAM configuration templates
+template.yml

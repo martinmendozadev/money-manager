@@ -1,0 +1,20 @@
+{
+    "name": "money-manager",
+    "version": "0.0.0",
+    "description": "Serverless CRUD service exposing a REST HTTP interface",
+    "keywords": [
+        "Go",
+        "Golang",
+        "Serverless",
+        "API"
+    ],
+    "devDependencies": {
+        "serverless-sam": "^0.2.0"
+    },
+    "author": "Martin Mendoza <martinMendozaDev@gmail.com>",
+    "license": "SEE LICENSE IN LICENSE",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/martinmendozadev/money-manager.git"
+    }
+}
