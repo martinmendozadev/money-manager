@@ -23,8 +23,7 @@ type User struct {
 }
 
 // Handler function
-func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
+func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) { //nolint:gocritic
 	// Creating session for client
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -41,7 +40,11 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// Unmarshal to User to access object properties
 	userString := request.Body
 	userStruct := User{}
-	json.Unmarshal([]byte(userString), &userStruct)
+	err := json.Unmarshal([]byte(userString), &userStruct)
+	if err != nil {
+		fmt.Println("Error Unmarshal userString: ", err.Error())
+		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	}
 
 	if userStruct.Email == "" {
 		return events.APIGatewayProxyResponse{StatusCode: 400}, nil
@@ -58,14 +61,14 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// Marshal to dynamodb item
 	av, err := dynamodbattribute.MarshalMap(user)
 	if err != nil {
-		fmt.Println("Error marshalling user: ", err.Error())
+		fmt.Println("Error marshaling user: ", err.Error())
 		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
 
 	tableName := os.Getenv("DYNAMODB_TABLE")
 
 	// Build put user input
-	fmt.Println("Putting user: %v", av)
+	fmt.Printf("Putting user: %v\n", av)
 	input := &dynamodb.PutItemInput{
 		Item:      av,
 		TableName: aws.String(tableName),
