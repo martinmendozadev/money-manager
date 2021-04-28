@@ -12,14 +12,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 )
 
 // User struct
 type User struct {
-	ID       string `json:"id,omitempty"`
-	Email    string `json:"email"`
-	FistName string `json:"fistName"`
-	LastName string `json:"lastName"`
+	ID        string `json:"id,omitempty"`
+	Email     string `json:"email"`
+	FistName  string `json:"fistName"`
+	LastName  string `json:"lastName"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 // Handler function
@@ -50,12 +53,17 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return events.APIGatewayProxyResponse{StatusCode: 400}, nil
 	}
 
+	// Creating a timestamp
+	now := time.Now()
+
 	// Create new struct of type user
 	user := User{
-		ID:       userUUID,
-		Email:    userStruct.Email,
-		FistName: userStruct.FistName,
-		LastName: userStruct.LastName,
+		ID:        userUUID,
+		Email:     userStruct.Email,
+		FistName:  userStruct.FistName,
+		LastName:  userStruct.LastName,
+		CreatedAt: now.String(),
+		UpdatedAt: now.String(),
 	}
 
 	// Marshal to dynamodb item
