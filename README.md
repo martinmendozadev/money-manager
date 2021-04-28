@@ -1,16 +1,38 @@
-# money-manager
-Expense tracking and personal finance
+# Money Manager
+Expense tracking and personal finance.
+
+## Technologies
+- [Go](https://golang.org/)
+- [AWS Lambda](https://aws.amazon.com/lambda/)
+- [AWS DynamoDB](https://aws.amazon.com/dynamodb/)
+- [AWS SAM CLI](https://aws.amazon.com/serverless/sam/)
+- [Serverless Framework](https://www.serverless.com/)
+- [Golangci-lint](https://golangci-lint.run/)
+<br />
+
+## Getting Started
+### Requirements
+1. [Install](https://golang.org/doc/install) Go > 1.16
+2. [Install](https://nodejs.org/en/download/) NodeJS > 14.16
+3. [Install](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) SAM CLI > 1.21
+4. [Install](https://www.serverless.com/framework/docs/getting-started/) Serverless Framework CLI > 2.31
+5. [Install](https://golangci-lint.run/usage/install/#local-installation) Golangci-lint > 1.31
+6. Install Make: > 4.2
+    - Linux/Debian: `sudo apt-get install build-essential`
+    - Windows: `choco install make`
+    - Mac: `brew install make`
+7. Run: `make install`
+<br />
 
 ## Development
+### Build
+- `make build`
 
-### golangci-linter
-__Installation__<br />
-If you don't have already install *golangci-lint* follow the next steps.
-1. Check [Documentation](https://golangci-lint.run/usage/install/#local-installation) and select your OS.
-2. Install
-3. Verify yor instalation with: `golangci-lint --version`
+### Build and Run
+- `make run`
 
-__Run__<br />
-To check sintax and inprove your code run at root directory in the project.
-- `golangci-lint run`
+### Clean cache
+- `make clean`
 
+### Golangci-linter
+- `make lint`
