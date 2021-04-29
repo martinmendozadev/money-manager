@@ -26,7 +26,7 @@ type User struct {
 }
 
 // Handler function
-func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) { //nolint:gocritic
+func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) { // nolint:gocritic
 	// Creating session for client
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
