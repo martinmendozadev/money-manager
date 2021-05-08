@@ -11,8 +11,11 @@ import (
 
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
+
+	"github.com/martinmendozadev/money-manager/src/utils"
 )
 
 // User struct
@@ -26,7 +29,7 @@ type User struct {
 }
 
 // Handler function
-func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) { // nolint:gocritic
+func Handler(request events.APIGatewayProxyRequest) (utils.Response, error) { // nolint:gocritic
 	// Creating session for client
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -35,22 +38,19 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// Create DynamoDB client
 	svc := dynamodb.New(sess)
 
-	// New UUID for user ID
 	userUUID := uuid.New().String()
 
-	fmt.Println("Generated new user UUID:", userUUID)
-
-	// Unmarshal to User to access object properties
+	// Unmarshal to access object properties
 	userString := request.Body
 	userStruct := User{}
 	err := json.Unmarshal([]byte(userString), &userStruct)
 	if err != nil {
 		fmt.Println("Error Unmarshal userString: ", err.Error())
-		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
 	if userStruct.Email == "" {
-		return events.APIGatewayProxyResponse{StatusCode: 400}, nil
+		return utils.Response{StatusCode: http.StatusBadRequest}, err
 	}
 
 	// Creating a timestamp
@@ -66,11 +66,11 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		UpdatedAt: now.String(),
 	}
 
-	// Marshal to dynamodb item
+	// Marshal to Dynamodb item
 	av, err := dynamodbattribute.MarshalMap(user)
 	if err != nil {
 		fmt.Println("Error marshaling user: ", err.Error())
-		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
 	tableName := os.Getenv("DYNAMODB_TABLE")
@@ -86,22 +86,18 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	_, err = svc.PutItem(input)
 
 	if err != nil {
-		fmt.Println("Got error calling PutItem: ", err.Error())
-		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+		fmt.Println("Got an error inserting a User: ", err.Error())
+		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
-	// Marshal user to return
-	userMarshalled, err := json.Marshal(user)
-
+	// Build standard http response
+	response, err := utils.NewResponse(http.StatusCreated, user)
 	if err != nil {
-		fmt.Println("Got Marshaling object: ", err.Error())
-		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+		fmt.Println("Got error using utils: ", err.Error())
+		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
-	fmt.Println("Returning user: ", string(userMarshalled))
-
-	// Returning response with AWS Lambda Proxy Response
-	return events.APIGatewayProxyResponse{Body: string(userMarshalled), StatusCode: 201}, nil
+	return *response, nil
 }
 
 func main() {
