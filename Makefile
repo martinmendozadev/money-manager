@@ -6,6 +6,7 @@ install:
 
 build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/users/create src/users/create.go
+	env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/utils/headers src/utils/headers.go
 
 clean:
 	rm -rf ./bin ./vendor Gopkg.lock ./.serverless ./template.yml
