@@ -1,6 +1,13 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
@@ -8,12 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/google/uuid"
-
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"os"
-	"time"
 
 	"github.com/martinmendozadev/money-manager/src/utils"
 )
@@ -29,7 +30,7 @@ type User struct {
 }
 
 // Handler function
-func Handler(request events.APIGatewayProxyRequest) (utils.Response, error) { // nolint:gocritic
+func CreateUser(ctx context.Context, request events.APIGatewayProxyRequest) (utils.Response, error) { // nolint:gocritic
 	// Creating session for client
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -101,5 +102,5 @@ func Handler(request events.APIGatewayProxyRequest) (utils.Response, error) { //
 }
 
 func main() {
-	lambda.Start(Handler)
+	lambda.Start(CreateUser)
 }
