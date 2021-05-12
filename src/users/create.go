@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -29,16 +29,20 @@ type User struct {
 	UpdatedAt string `json:"updatedAt"`
 }
 
-// Handler function
-func CreateUser(ctx context.Context, request events.APIGatewayProxyRequest) (utils.Response, error) { // nolint:gocritic
+var svc *dynamodb.DynamoDB
+
+func init() {
 	// Creating session for client
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 
 	// Create DynamoDB client
-	svc := dynamodb.New(sess)
+	svc = dynamodb.New(sess)
+}
 
+// CreateUser -
+func CreateUser(ctx context.Context, request events.APIGatewayProxyRequest) (utils.Response, error) { // nolint:gocritic
 	userUUID := uuid.New().String()
 
 	// Unmarshal to access object properties
@@ -46,7 +50,7 @@ func CreateUser(ctx context.Context, request events.APIGatewayProxyRequest) (uti
 	userStruct := User{}
 	err := json.Unmarshal([]byte(userString), &userStruct)
 	if err != nil {
-		fmt.Println("Error Unmarshal userString: ", err.Error())
+		log.Println("Error Unmarshal userString: ", err.Error())
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
@@ -70,14 +74,14 @@ func CreateUser(ctx context.Context, request events.APIGatewayProxyRequest) (uti
 	// Marshal to Dynamodb item
 	av, err := dynamodbattribute.MarshalMap(user)
 	if err != nil {
-		fmt.Println("Error marshaling user: ", err.Error())
+		log.Println("Error marshaling user: ", err.Error())
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
 	tableName := os.Getenv("DYNAMODB_TABLE")
 
 	// Build put user input
-	fmt.Printf("Putting user: %v\n", av)
+	log.Printf("Putting user: %v\n", av)
 	input := &dynamodb.PutItemInput{
 		Item:      av,
 		TableName: aws.String(tableName),
@@ -85,16 +89,15 @@ func CreateUser(ctx context.Context, request events.APIGatewayProxyRequest) (uti
 
 	// PutItem request in DynamoDB
 	_, err = svc.PutItem(input)
-
 	if err != nil {
-		fmt.Println("Got an error inserting a User: ", err.Error())
+		log.Println("Got an error inserting a User: ", err.Error())
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
 	// Build standard http response
 	response, err := utils.NewResponse(http.StatusCreated, user)
 	if err != nil {
-		fmt.Println("Got error using utils: ", err.Error())
+		log.Println("Got error using utils: ", err.Error())
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
