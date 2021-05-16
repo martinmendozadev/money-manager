@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -16,6 +17,7 @@ func NewResponse(code int, body interface{}) (*Response, error) {
 	objMarshalled, err := json.Marshal(body)
 	if err != nil {
 		statusCode = 500
+		log.Println("Got error marshaling object: ", err.Error())
 	}
 
 	res := &Response{
