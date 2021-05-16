@@ -26,23 +26,17 @@ func NewResponse(code int, body interface{}) (*Response, error) {
 		IsBase64Encoded: false,
 	}
 
-	res.WithCors()
+	res.setHeaders()
 
 	return res, nil
 }
 
-// SetHeaders define response headers
-func (r *Response) SetHeaders(h map[string]string) {
-	r.Headers = h
-}
-
-// WithCors add cors support to API Gatway response
-func (r *Response) WithCors() {
-	if r.Headers == nil {
-		r.Headers = map[string]string{}
+// setHeaders add standard support headers to an API Gatway response
+func (response *Response) setHeaders() {
+	if response.Headers == nil {
+		response.Headers = map[string]string{}
 	}
 
-	// Warning: Upadate origon to production
-	r.Headers["Access-Control-Allow-Origin"] = "localhost"
-	r.Headers["Content-Type"] = "application/json"
+	response.Headers["Access-Control-Allow-Origin"] = "*"
+	response.Headers["Content-Type"] = "application/json"
 }
