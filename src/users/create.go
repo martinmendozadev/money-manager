@@ -1,19 +1,16 @@
 package main
 
 import (
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/google/uuid"
-
+	"context"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/google/uuid"
 
 	"github.com/martinmendozadev/money-manager/src/utils"
 )
@@ -28,35 +25,19 @@ type User struct {
 	UpdatedAt string `json:"updatedAt"`
 }
 
-// Handler function
-func Handler(request events.APIGatewayProxyRequest) (utils.Response, error) { // nolint:gocritic
-	// Creating session for client
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-
-	// Create DynamoDB client
-	svc := dynamodb.New(sess)
-
-	userUUID := uuid.New().String()
-
-	// Unmarshal to access object properties
+// CreateUser -
+func CreateUser(ctx context.Context, request *events.APIGatewayProxyRequest) (utils.Response, error) {
+	// Unmarshal to access request object properties
 	userString := request.Body
 	userStruct := User{}
 	err := json.Unmarshal([]byte(userString), &userStruct)
 	if err != nil {
-		fmt.Println("Error Unmarshal userString: ", err.Error())
+		log.Println("Error Unmarshal userString: ", err.Error())
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
-	if userStruct.Email == "" {
-		return utils.Response{StatusCode: http.StatusBadRequest}, err
-	}
-
-	// Creating a timestamp
+	userUUID := uuid.New().String()
 	now := time.Now()
-
-	// Create new struct of type user
 	user := User{
 		ID:        userUUID,
 		Email:     userStruct.Email,
@@ -66,34 +47,23 @@ func Handler(request events.APIGatewayProxyRequest) (utils.Response, error) { //
 		UpdatedAt: now.String(),
 	}
 
-	// Marshal to Dynamodb item
-	av, err := dynamodbattribute.MarshalMap(user)
-	if err != nil {
-		fmt.Println("Error marshaling user: ", err.Error())
-		return utils.Response{StatusCode: http.StatusInternalServerError}, err
-	}
-
 	tableName := os.Getenv("DYNAMODB_TABLE")
 
-	// Build put user input
-	fmt.Printf("Putting user: %v\n", av)
-	input := &dynamodb.PutItemInput{
-		Item:      av,
-		TableName: aws.String(tableName),
-	}
-
-	// PutItem request in DynamoDB
-	_, err = svc.PutItem(input)
-
+	// Marshal user to insert at DB
+	av, err := utils.MarshalItem(user)
 	if err != nil {
-		fmt.Println("Got an error inserting a User: ", err.Error())
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
-	// Build standard http response
+	// Insert Item in DynamoDB
+	_, err = utils.InsertNewItem(av, tableName)
+	if err != nil {
+		return utils.Response{StatusCode: http.StatusInternalServerError}, err
+	}
+
+	// Success response
 	response, err := utils.NewResponse(http.StatusCreated, user)
 	if err != nil {
-		fmt.Println("Got error using utils: ", err.Error())
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
@@ -101,5 +71,5 @@ func Handler(request events.APIGatewayProxyRequest) (utils.Response, error) { //
 }
 
 func main() {
-	lambda.Start(Handler)
+	lambda.Start(CreateUser)
 }
