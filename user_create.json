@@ -1,0 +1,27 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "Create user schema validator",
+  "required": [
+    "email",
+    "firstName",
+    "lastName"
+  ],
+  "properties": {
+    "email": {
+      "type": "string",
+      "title": "User Email",
+      "maxLength": 50,
+      "pattern": "^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$"
+    },
+    "firstName": {
+      "type": "string",
+      "title": "Fist Name"
+    },
+    "lastName": {
+      "type": "string",
+      "title": "Last Name"
+    }
+  }
+}
