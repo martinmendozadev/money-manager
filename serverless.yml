@@ -1,17 +1,18 @@
-app: money-manager
-service: aws-golang-rest-api-with-dynamodb
+service: money-manager
+app: money-manager-users
 
-frameworkVersion: ">=2.31.0"
+frameworkVersion: '2'
 
 provider:
   name: aws
   runtime: go1.x
-  stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
-  lambdaHashingVersion: 20201221
   memorySize: 128
+  stage: ${opt:stage, 'dev'}
+  lambdaHashingVersion: 20201221
+  region: ${opt:region, 'us-east-1'}
   environment:
-    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
+    DYNAMODB_TABLE: ${self:app}-${self:provider.stage}
+    ALLOWED_ORIGINS: '*'
   iam:
     role:
       statements:
@@ -38,9 +39,34 @@ functions:
           path: users
           method: post
           cors: true
+          request:
+            schemas:
+              application/json: ${file(./user_create.json)}
+
+custom:
+    apiAllowedOrigins: "'${self:provider.environment.ALLOWED_ORIGINS}'"
 
 resources:
   Resources:
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+            gatewayresponse.header.Access-Control-Allow-Origin: ${self:custom.apiAllowedOrigins}
+            gatewayresponse.header.Access-Control-Allow-Headers: ${self:custom.apiAllowedOrigins}
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+    GatewayResponseDefault5XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: ${self:custom.apiAllowedOrigins}
+          gatewayresponse.header.Access-Control-Allow-Headers: ${self:custom.apiAllowedOrigins}
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+
     UsersDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Retain
