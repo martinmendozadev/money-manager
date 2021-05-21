@@ -19,7 +19,7 @@ import (
 type User struct {
 	ID        string `json:"id,omitempty"`
 	Email     string `json:"email"`
-	FistName  string `json:"fistName"`
+	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
@@ -41,7 +41,7 @@ func CreateUser(ctx context.Context, request *events.APIGatewayProxyRequest) (ut
 	user := User{
 		ID:        userUUID,
 		Email:     userStruct.Email,
-		FistName:  userStruct.FistName,
+		FirstName: userStruct.FirstName,
 		LastName:  userStruct.LastName,
 		CreatedAt: now.String(),
 		UpdatedAt: now.String(),
