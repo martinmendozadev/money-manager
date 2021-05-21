@@ -17,11 +17,13 @@
     },
     "firstName": {
       "type": "string",
-      "title": "Fist Name"
+      "title": "Fist Name",
+      "pattern": "^[a-zA-Z ]{3,30}$"
     },
     "lastName": {
       "type": "string",
-      "title": "Last Name"
+      "title": "Last Name",
+      "pattern": "^[a-zA-Z ]{3,30}$"
     }
   }
 }
