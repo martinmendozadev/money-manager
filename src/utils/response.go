@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"log"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -33,10 +34,12 @@ func NewResponse(code int, body interface{}) (*Response, error) {
 
 // setHeaders add standard support headers to an API Gatway response
 func (response *Response) setHeaders() {
+	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
+
 	if response.Headers == nil {
 		response.Headers = map[string]string{}
 	}
 
-	response.Headers["Access-Control-Allow-Origin"] = "*"
+	response.Headers["Access-Control-Allow-Origin"] = allowedOrigins
 	response.Headers["Content-Type"] = "application/json"
 }
