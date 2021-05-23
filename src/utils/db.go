@@ -36,7 +36,7 @@ func MarshalItem(item interface{}) (map[string]*dynamodb.AttributeValue, error) 
 }
 
 // InsertNewItem -
-func InsertNewItem(item map[string]*dynamodb.AttributeValue, tableName string) (*dynamodb.PutItemOutput, error) {
+func InsertNewItem(item map[string]*dynamodb.AttributeValue, tableName *string) (*dynamodb.PutItemOutput, error) {
 	svc := dynamoDBClient()
 
 	log.Printf("Putting new Item: %v\n", item)
@@ -44,7 +44,7 @@ func InsertNewItem(item map[string]*dynamodb.AttributeValue, tableName string) (
 	// PutItem in DynamoDB
 	ok, err := svc.PutItem(&dynamodb.PutItemInput{
 		Item:      item,
-		TableName: aws.String(tableName),
+		TableName: aws.String(*tableName),
 	})
 
 	if err != nil {
