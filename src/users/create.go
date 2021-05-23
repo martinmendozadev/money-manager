@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -26,7 +25,7 @@ type User struct {
 }
 
 // CreateUser -
-func CreateUser(ctx context.Context, request *events.APIGatewayProxyRequest) (utils.Response, error) {
+func CreateUser(request *events.APIGatewayProxyRequest) (utils.Response, error) {
 	// Unmarshal to access request object properties
 	userString := request.Body
 	userStruct := User{}
@@ -64,7 +63,7 @@ func CreateUser(ctx context.Context, request *events.APIGatewayProxyRequest) (ut
 	}
 
 	// Insert Item in DynamoDB
-	_, err = utils.InsertNewItem(av, tableName)
+	_, err = utils.InsertNewItem(av, &tableName)
 	if err != nil {
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
