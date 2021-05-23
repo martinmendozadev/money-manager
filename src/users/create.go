@@ -49,6 +49,14 @@ func CreateUser(ctx context.Context, request *events.APIGatewayProxyRequest) (ut
 
 	tableName := os.Getenv("DYNAMODB_TABLE")
 
+	// Search an user with the same email
+	result, err := utils.FindUserByEmail(&user.Email, &tableName)
+	if *result.Count > 0 {
+		return utils.Response{StatusCode: http.StatusConflict}, err
+	} else if err != nil {
+		return utils.Response{StatusCode: http.StatusInternalServerError}, err
+	}
+
 	// Marshal user to insert at DB
 	av, err := utils.MarshalItem(user)
 	if err != nil {

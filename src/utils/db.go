@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 )
 
 // DynamoDBClient -
@@ -51,4 +52,37 @@ func InsertNewItem(item map[string]*dynamodb.AttributeValue, tableName string) (
 	}
 
 	return ok, err
+}
+
+// FindUserByEmail -
+func FindUserByEmail(email, tableName *string) (*dynamodb.ScanOutput, error) {
+	svc := dynamoDBClient()
+
+	// Get all items with that email
+	filt := expression.Name("email").Equal(expression.Value(*email))
+
+	// Get back the id
+	proj := expression.NamesList(expression.Name("id"))
+
+	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+	if err != nil {
+		log.Fatalf("Got error building expression: %s", err)
+	}
+
+	// Build the query input parameters
+	params := &dynamodb.ScanInput{
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		ProjectionExpression:      expr.Projection(),
+		TableName:                 aws.String(*tableName),
+	}
+
+	// Make the DynamoDB Query API call
+	result, err := svc.Scan(params)
+	if err != nil {
+		log.Fatalf("Query API call failed: %s", err)
+	}
+
+	return result, err
 }
