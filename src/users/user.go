@@ -1,4 +1,4 @@
-package user
+package main
 
 // User struct
 type User struct {
