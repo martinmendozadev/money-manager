@@ -11,6 +11,20 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 )
 
+// DBClient connection struct
+type DBClient struct {
+	svc       *dynamodb.DynamoDB
+	tableName string
+}
+
+// NewDBConnection -
+func NewDBConnection(tableName string) *DBClient {
+	return &DBClient{
+		svc:       dynamoDBClient(),
+		tableName: tableName,
+	}
+}
+
 // create a new session to conect with Dynamodb
 func dynamoDBClient() *dynamodb.DynamoDB {
 	// Creating session for client
@@ -36,13 +50,10 @@ func MarshalItem(item interface{}) (map[string]*dynamodb.AttributeValue, error) 
 }
 
 // SaveItem into Dynamodb
-func SaveItem(item map[string]*dynamodb.AttributeValue, tableName *string) (*dynamodb.PutItemOutput, error) {
-	svc := dynamoDBClient()
-
-	// PutItem in DynamoDB
-	ok, err := svc.PutItem(&dynamodb.PutItemInput{
+func (db *DBClient) SaveItem(item map[string]*dynamodb.AttributeValue) (*dynamodb.PutItemOutput, error) {
+	ok, err := db.svc.PutItem(&dynamodb.PutItemInput{
 		Item:      item,
-		TableName: aws.String(*tableName),
+		TableName: aws.String(db.tableName),
 	})
 
 	if err != nil {
@@ -53,9 +64,7 @@ func SaveItem(item map[string]*dynamodb.AttributeValue, tableName *string) (*dyn
 }
 
 // FindUserByEmail at DynamoDB
-func FindUserByEmail(email, tableName *string) (*dynamodb.ScanOutput, error) {
-	svc := dynamoDBClient()
-
+func (db *DBClient) FindUserByEmail(email *string) (*dynamodb.ScanOutput, error) {
 	// Get all items with that email
 	filt := expression.Name("email").Equal(expression.Value(*email))
 
@@ -73,11 +82,11 @@ func FindUserByEmail(email, tableName *string) (*dynamodb.ScanOutput, error) {
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
 		ProjectionExpression:      expr.Projection(),
-		TableName:                 aws.String(*tableName),
+		TableName:                 aws.String(db.tableName),
 	}
 
 	// Make the DynamoDB Query API call
-	result, err := svc.Scan(params)
+	result, err := db.svc.Scan(params)
 	if err != nil {
 		log.Fatalf("Query API call failed: %s", err)
 	}

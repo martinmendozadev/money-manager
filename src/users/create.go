@@ -36,9 +36,10 @@ func CreateUser(request utils.Request) (utils.Response, error) {
 	}
 
 	tableName := os.Getenv("DYNAMODB_TABLE")
+	dbClient := utils.NewDBConnection(tableName)
 
 	// Search an user with the same email
-	result, err := utils.FindUserByEmail(&user.Email, &tableName)
+	result, err := dbClient.FindUserByEmail(&user.Email)
 	if *result.Count > 0 {
 		return utils.Response{StatusCode: http.StatusConflict}, err
 	} else if err != nil {
@@ -52,7 +53,7 @@ func CreateUser(request utils.Request) (utils.Response, error) {
 	}
 
 	// Insert Item in DynamoDB
-	_, err = utils.SaveItem(av, &tableName)
+	_, err = dbClient.SaveItem(av)
 	if err != nil {
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
