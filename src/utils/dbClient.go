@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 )
 
-// DynamoDBClient -
+// create a new session to conect with Dynamodb
 func dynamoDBClient() *dynamodb.DynamoDB {
 	// Creating session for client
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -24,7 +24,7 @@ func dynamoDBClient() *dynamodb.DynamoDB {
 	return svc
 }
 
-// MarshalItem to dynamodbAtributeValue
+// MarshalItem as a dynamodbAtributeValue
 func MarshalItem(item interface{}) (map[string]*dynamodb.AttributeValue, error) {
 	// Marshal to Dynamodb item
 	av, err := dynamodbattribute.MarshalMap(item)
@@ -35,11 +35,9 @@ func MarshalItem(item interface{}) (map[string]*dynamodb.AttributeValue, error) 
 	return av, err
 }
 
-// SaveItem into dynamodb
+// SaveItem into Dynamodb
 func SaveItem(item map[string]*dynamodb.AttributeValue, tableName *string) (*dynamodb.PutItemOutput, error) {
 	svc := dynamoDBClient()
-
-	log.Printf("Putting new Item: %v\n", item)
 
 	// PutItem in DynamoDB
 	ok, err := svc.PutItem(&dynamodb.PutItemInput{
@@ -54,7 +52,7 @@ func SaveItem(item map[string]*dynamodb.AttributeValue, tableName *string) (*dyn
 	return ok, err
 }
 
-// FindUserByEmail -
+// FindUserByEmail at DynamoDB
 func FindUserByEmail(email, tableName *string) (*dynamodb.ScanOutput, error) {
 	svc := dynamoDBClient()
 
