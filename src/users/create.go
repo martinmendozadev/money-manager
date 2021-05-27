@@ -7,15 +7,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/google/uuid"
 
 	"github.com/martinmendozadev/money-manager/src/utils"
 )
 
 // CreateUser -
-func CreateUser(request *events.APIGatewayProxyRequest) (utils.Response, error) {
+func CreateUser(request utils.Request) (utils.Response, error) {
 	// Unmarshal to access request object properties
 	userString := request.Body
 	userStruct := User{}
@@ -68,5 +66,5 @@ func CreateUser(request *events.APIGatewayProxyRequest) (utils.Response, error) 
 }
 
 func main() {
-	lambda.Start(CreateUser)
+	utils.Start(CreateUser)
 }
