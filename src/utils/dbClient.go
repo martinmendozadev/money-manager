@@ -35,8 +35,8 @@ func MarshalItem(item interface{}) (map[string]*dynamodb.AttributeValue, error) 
 	return av, err
 }
 
-// InsertNewItem -
-func InsertNewItem(item map[string]*dynamodb.AttributeValue, tableName *string) (*dynamodb.PutItemOutput, error) {
+// SaveItem into dynamodb
+func SaveItem(item map[string]*dynamodb.AttributeValue, tableName *string) (*dynamodb.PutItemOutput, error) {
 	svc := dynamoDBClient()
 
 	log.Printf("Putting new Item: %v\n", item)

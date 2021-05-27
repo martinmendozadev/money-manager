@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/martinmendozadev/money-manager/src/models"
 	"github.com/martinmendozadev/money-manager/src/utils"
 )
 
@@ -16,7 +17,7 @@ import (
 func CreateUser(request utils.Request) (utils.Response, error) {
 	// Unmarshal to access request object properties
 	userString := request.Body
-	userStruct := User{}
+	userStruct := models.User{}
 	err := json.Unmarshal([]byte(userString), &userStruct)
 	if err != nil {
 		log.Println("Error Unmarshal userString: ", err.Error())
@@ -25,7 +26,7 @@ func CreateUser(request utils.Request) (utils.Response, error) {
 
 	userUUID := uuid.New().String()
 	now := time.Now()
-	user := User{
+	user := models.User{
 		ID:        userUUID,
 		Email:     userStruct.Email,
 		FirstName: userStruct.FirstName,
@@ -51,7 +52,7 @@ func CreateUser(request utils.Request) (utils.Response, error) {
 	}
 
 	// Insert Item in DynamoDB
-	_, err = utils.InsertNewItem(av, &tableName)
+	_, err = utils.SaveItem(av, &tableName)
 	if err != nil {
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
