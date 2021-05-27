@@ -13,14 +13,14 @@ import (
 
 // DBClient connection struct
 type DBClient struct {
-	svc       *dynamodb.DynamoDB
 	tableName string
 }
+
+var svc = dynamoDBClient()
 
 // NewDBConnection -
 func NewDBConnection(tableName string) *DBClient {
 	return &DBClient{
-		svc:       dynamoDBClient(),
 		tableName: tableName,
 	}
 }
@@ -51,7 +51,7 @@ func MarshalItem(item interface{}) (map[string]*dynamodb.AttributeValue, error) 
 
 // SaveItem into Dynamodb
 func (db *DBClient) SaveItem(item map[string]*dynamodb.AttributeValue) (*dynamodb.PutItemOutput, error) {
-	ok, err := db.svc.PutItem(&dynamodb.PutItemInput{
+	ok, err := svc.PutItem(&dynamodb.PutItemInput{
 		Item:      item,
 		TableName: aws.String(db.tableName),
 	})
@@ -86,7 +86,7 @@ func (db *DBClient) FindUserByEmail(email *string) (*dynamodb.ScanOutput, error)
 	}
 
 	// Make the DynamoDB Query API call
-	result, err := db.svc.Scan(params)
+	result, err := svc.Scan(params)
 	if err != nil {
 		log.Fatalf("Query API call failed: %s", err)
 	}
