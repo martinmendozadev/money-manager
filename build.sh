@@ -33,9 +33,13 @@ compile_folder_recurse() {
             dir=${path##*/}
             compile_folder_recurse "$path"
         elif [ -f "$path" ]; then
-            echo "[$((compiledFiles+1))] Compiling: $path"
-            env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o $OUT_PATH/$dir/$(basename -- $path .go) $path
-            compiledFiles=$((compiledFiles+1))
+            extension="${path##*.}"
+
+            if [ "$extension" = "go" ]; then
+                echo "[$((compiledFiles+1))] Compiling: $path"
+                env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o $OUT_PATH/$dir/$(basename -- $path .go) $path
+                compiledFiles=$((compiledFiles+1))
+            fi
         fi
     done
 }
