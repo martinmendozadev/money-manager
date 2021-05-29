@@ -33,9 +33,7 @@ func dynamoDBClient() *dynamodb.DynamoDB {
 	}))
 
 	// Create DynamoDB client
-	svc := dynamodb.New(sess)
-
-	return svc
+	return dynamodb.New(sess)
 }
 
 // MarshalItem as a dynamodbAtributeValue
