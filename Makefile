@@ -5,7 +5,7 @@ install:
 	npm i
 
 build:
-	sh ./build.sh
+	sh ./build
 
 clean:
 	rm -rf ./bin ./vendor Gopkg.lock ./.serverless ./template.yml
