@@ -10,4 +10,4 @@ create:
         cors: true
         request:
             schemas:
-              application/json: ${file(src/users/user_create_squema_validator.json)}
+              application/json: ${file(src/users/users_create_squema_validator.json)}
