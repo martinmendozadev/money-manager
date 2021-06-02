@@ -30,19 +30,7 @@ package:
     - ./bin/**
 
 functions:
-  create:
-    handler: bin/users/create
-    package:
-      include:
-        - ./bin/users/create
-    events:
-      - http:
-          path: users
-          method: post
-          cors: true
-          request:
-            schemas:
-              application/json: ${file(./user_create.json)}
+    - ${file(./src/users/sls_users.yml)}
 
 custom:
     apiAllowedOrigins: "'${self:provider.environment.ALLOWED_ORIGINS}'"

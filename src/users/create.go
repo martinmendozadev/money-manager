@@ -7,18 +7,17 @@ import (
 	"os"
 	"time"
 
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/google/uuid"
 
+	"github.com/martinmendozadev/money-manager/src/models"
 	"github.com/martinmendozadev/money-manager/src/utils"
 )
 
 // CreateUser -
-func CreateUser(request *events.APIGatewayProxyRequest) (utils.Response, error) {
+func CreateUser(request utils.Request) (utils.Response, error) {
 	// Unmarshal to access request object properties
 	userString := request.Body
-	userStruct := User{}
+	userStruct := models.User{}
 	err := json.Unmarshal([]byte(userString), &userStruct)
 	if err != nil {
 		log.Println("Error Unmarshal userString: ", err.Error())
@@ -27,7 +26,7 @@ func CreateUser(request *events.APIGatewayProxyRequest) (utils.Response, error) 
 
 	userUUID := uuid.New().String()
 	now := time.Now()
-	user := User{
+	user := models.User{
 		ID:        userUUID,
 		Email:     userStruct.Email,
 		FirstName: userStruct.FirstName,
@@ -37,9 +36,10 @@ func CreateUser(request *events.APIGatewayProxyRequest) (utils.Response, error) 
 	}
 
 	tableName := os.Getenv("DYNAMODB_TABLE")
+	dbClient := utils.NewDBConnection(tableName)
 
 	// Search an user with the same email
-	result, err := utils.FindUserByEmail(&user.Email, &tableName)
+	result, err := dbClient.FindUserByEmail(&user.Email)
 	if *result.Count > 0 {
 		return utils.Response{StatusCode: http.StatusConflict}, err
 	} else if err != nil {
@@ -53,7 +53,7 @@ func CreateUser(request *events.APIGatewayProxyRequest) (utils.Response, error) 
 	}
 
 	// Insert Item in DynamoDB
-	_, err = utils.InsertNewItem(av, &tableName)
+	_, err = dbClient.SaveItem(av)
 	if err != nil {
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
@@ -68,5 +68,5 @@ func CreateUser(request *events.APIGatewayProxyRequest) (utils.Response, error) 
 }
 
 func main() {
-	lambda.Start(CreateUser)
+	utils.Start(CreateUser)
 }

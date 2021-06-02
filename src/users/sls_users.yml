@@ -1,0 +1,13 @@
+create:
+  handler: bin/users/create
+  package:
+    include:
+      - bin/users/create
+  events:
+    - http:
+        path: users
+        method: post
+        cors: true
+        request:
+            schemas:
+              application/json: ${file(src/users/users_create_squema_validator.json)}

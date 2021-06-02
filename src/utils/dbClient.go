@@ -11,7 +11,21 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 )
 
-// DynamoDBClient -
+// DBClient connection struct
+type DBClient struct {
+	tableName string
+}
+
+var svc = dynamoDBClient()
+
+// NewDBConnection -
+func NewDBConnection(tableName string) *DBClient {
+	return &DBClient{
+		tableName: tableName,
+	}
+}
+
+// create a new session to conect with Dynamodb
 func dynamoDBClient() *dynamodb.DynamoDB {
 	// Creating session for client
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
@@ -19,12 +33,10 @@ func dynamoDBClient() *dynamodb.DynamoDB {
 	}))
 
 	// Create DynamoDB client
-	svc := dynamodb.New(sess)
-
-	return svc
+	return dynamodb.New(sess)
 }
 
-// MarshalItem to dynamodbAtributeValue
+// MarshalItem as a dynamodbAtributeValue
 func MarshalItem(item interface{}) (map[string]*dynamodb.AttributeValue, error) {
 	// Marshal to Dynamodb item
 	av, err := dynamodbattribute.MarshalMap(item)
@@ -35,16 +47,11 @@ func MarshalItem(item interface{}) (map[string]*dynamodb.AttributeValue, error) 
 	return av, err
 }
 
-// InsertNewItem -
-func InsertNewItem(item map[string]*dynamodb.AttributeValue, tableName *string) (*dynamodb.PutItemOutput, error) {
-	svc := dynamoDBClient()
-
-	log.Printf("Putting new Item: %v\n", item)
-
-	// PutItem in DynamoDB
+// SaveItem into Dynamodb
+func (db *DBClient) SaveItem(item map[string]*dynamodb.AttributeValue) (*dynamodb.PutItemOutput, error) {
 	ok, err := svc.PutItem(&dynamodb.PutItemInput{
 		Item:      item,
-		TableName: aws.String(*tableName),
+		TableName: aws.String(db.tableName),
 	})
 
 	if err != nil {
@@ -54,10 +61,8 @@ func InsertNewItem(item map[string]*dynamodb.AttributeValue, tableName *string) 
 	return ok, err
 }
 
-// FindUserByEmail -
-func FindUserByEmail(email, tableName *string) (*dynamodb.ScanOutput, error) {
-	svc := dynamoDBClient()
-
+// FindUserByEmail at DynamoDB
+func (db *DBClient) FindUserByEmail(email *string) (*dynamodb.ScanOutput, error) {
 	// Get all items with that email
 	filt := expression.Name("email").Equal(expression.Value(*email))
 
@@ -75,7 +80,7 @@ func FindUserByEmail(email, tableName *string) (*dynamodb.ScanOutput, error) {
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
 		ProjectionExpression:      expr.Projection(),
-		TableName:                 aws.String(*tableName),
+		TableName:                 aws.String(db.tableName),
 	}
 
 	// Make the DynamoDB Query API call
