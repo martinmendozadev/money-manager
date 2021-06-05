@@ -14,8 +14,7 @@ func GetUser(request utils.Request) (utils.Response, error) {
 	dbClient := utils.NewDBConnection(tableName)
 
 	// Getting id from path parameters
-	//pathParamID := request.PathParameters["id"]
-	pathParamID := "c1abfedc-02a1-4cd4-94e4-2eea47496b1d"
+	pathParamID := request.PathParameters["id"]
 
 	// Found user by ID
 	result, err := dbClient.GetItemByID(&pathParamID)
