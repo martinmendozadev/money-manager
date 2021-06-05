@@ -60,9 +60,6 @@ func CreateUser(request utils.Request) (utils.Response, error) {
 
 	// Success response
 	response, err := utils.NewResponse(http.StatusCreated, user)
-	if err != nil {
-		return utils.Response{StatusCode: http.StatusInternalServerError}, err
-	}
 
 	return *response, nil
 }
