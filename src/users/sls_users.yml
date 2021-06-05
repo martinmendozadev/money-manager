@@ -11,3 +11,14 @@ create:
         request:
             schemas:
               application/json: ${file(src/users/users_create_squema_validator.json)}
+
+get:
+  handler: bin/users/get
+  package:
+    include:
+      - bin/users/get
+  events:
+    - http:
+        path: users/{id}
+        method: get
+        cors: true
