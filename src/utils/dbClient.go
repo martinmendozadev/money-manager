@@ -47,6 +47,13 @@ func MarshalItem(item interface{}) (map[string]*dynamodb.AttributeValue, error) 
 	return av, err
 }
 
+// UnMarshalItem -
+func UnMarshalItem(result map[string]*dynamodb.AttributeValue, item interface{}) error {
+	err := dynamodbattribute.UnmarshalMap(result, &item)
+
+	return err
+}
+
 // SaveItem into Dynamodb
 func (db *DBClient) SaveItem(item map[string]*dynamodb.AttributeValue) (*dynamodb.PutItemOutput, error) {
 	ok, err := svc.PutItem(&dynamodb.PutItemInput{
@@ -59,6 +66,20 @@ func (db *DBClient) SaveItem(item map[string]*dynamodb.AttributeValue) (*dynamod
 	}
 
 	return ok, err
+}
+
+// GetItemByID -
+func (db *DBClient) GetItemByID(id *string) (*dynamodb.GetItemOutput, error) {
+	result, err := svc.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(db.tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"id": {
+				S: aws.String(*id),
+			},
+		},
+	})
+
+	return result, err
 }
 
 // FindUserByEmail at DynamoDB
