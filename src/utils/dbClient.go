@@ -47,9 +47,13 @@ func MarshalItem(item interface{}) (map[string]*dynamodb.AttributeValue, error) 
 	return av, err
 }
 
-// UnMarshalItem -
-func UnMarshalItem(result map[string]*dynamodb.AttributeValue, item interface{}) error {
+// UnmarshalItem -
+func UnmarshalItem(result map[string]*dynamodb.AttributeValue, item interface{}) error {
 	err := dynamodbattribute.UnmarshalMap(result, &item)
+
+	if err != nil {
+		panic(fmt.Sprintf("Failed to unmarshal Record, %v", err))
+	}
 
 	return err
 }
@@ -78,6 +82,10 @@ func (db *DBClient) GetItemByID(id *string) (*dynamodb.GetItemOutput, error) {
 			},
 		},
 	})
+
+	if err != nil {
+		log.Fatalf("Got error calling GetItem: %s", err)
+	}
 
 	return result, err
 }

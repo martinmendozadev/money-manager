@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 
@@ -19,29 +17,27 @@ func GetUser(request utils.Request) (utils.Response, error) {
 	//pathParamID := request.PathParameters["id"]
 	pathParamID := "c1abfedc-02a1-4cd4-94e4-2eea47496b1d"
 
+	// Found user by ID
 	result, err := dbClient.GetItemByID(&pathParamID)
 	if err != nil {
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
 
-	if len(result.Item) == 0 {
+	// In case not found any user
+	if result.Item == nil {
 		return utils.Response{StatusCode: http.StatusNoContent}, err
 	}
 
 	user := models.User{}
 
-	err = utils.UnMarshalItem(result.Item, &user)
-	if err != nil {
-		panic(fmt.Sprintf("Failed to UnmarshalMap result.Item: %v\n", err))
-	}
-
-	marshalledUser, err := json.Marshal(user)
-
-	// Success response
-	response, err := utils.NewResponse(http.StatusOK, marshalledUser)
+	// UnmarshallMap result.item into user
+	err = utils.UnmarshalItem(result.Item, &user)
 	if err != nil {
 		return utils.Response{StatusCode: http.StatusInternalServerError}, err
 	}
+
+	// Success response
+	response, err := utils.NewResponse(http.StatusOK, user)
 
 	return *response, nil
 }
