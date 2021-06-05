@@ -67,6 +67,6 @@ func CreateUser(request utils.Request) (utils.Response, error) {
 	return *response, nil
 }
 
-func main() {
+func main() { // nolint:typecheck
 	utils.Start(CreateUser)
 }

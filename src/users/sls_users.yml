@@ -16,7 +16,7 @@ get:
   handler: bin/users/get
   package:
     include:
-      - ./bin/users/get
+      - bin/users/get
   events:
     - http:
         path: users/{id}
