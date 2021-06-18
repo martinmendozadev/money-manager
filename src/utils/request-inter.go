@@ -2,26 +2,25 @@ package utils
 
 import (
 	"context"
+	"io"
+	"log"
 	"net/http"
-	"strings"
 )
 
 // SendWithContext send an HTTP request and accepting context
-func SendWithContext(url string) (*http.Request, error) {
-	ctx := context.Background()
-	body := strings.NewReader("Some text")
-
-	// Change NewRequest to NewRequestWithContext and pass context it
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, body)
+func SendWithContext(ctx context.Context, method, url string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
-		return req, nil
+		log.Panicf("Cannot create request: %s\n", err)
+		return req, err
 	}
 
-	_, err = http.DefaultClient.Do(req)
+	rsp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return req, nil
+		log.Panicf("Cannot response request: %s\n", err)
+		return req, err
 	}
-	defer req.Body.Close()
+	defer rsp.Body.Close()
 
 	return req, nil
 }

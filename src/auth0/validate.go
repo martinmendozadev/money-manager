@@ -1,8 +1,10 @@
 package auht0
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
 	"os"
 	"strings"
 
@@ -61,7 +63,8 @@ func CheckScope(scope, tokenString string) bool {
 
 func getPemCert(token *jwt.Token) (string, error) {
 	cert := ""
-	resp, err := utils.SendWithContext("https://" + os.Getenv("AUTH0_DOMAIN") + "/.well-known/jwks.json")
+	ctx := context.Background()
+	resp, err := utils.SendWithContext(ctx, http.MethodGet, "https://"+os.Getenv("AUTH0_DOMAIN")+"/.well-known/jwks.json", nil)
 	if err != nil {
 		return cert, err
 	}
