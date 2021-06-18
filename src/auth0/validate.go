@@ -1,15 +1,15 @@
-package main
+package auht0
 
 import (
 	"encoding/json"
 	"errors"
-	"log"
-	"net/http"
 	"os"
 	"strings"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/form3tech-oss/jwt-go"
+
+	"github.com/martinmendozadev/money-manager/src/utils"
 )
 
 // Jwks -
@@ -33,7 +33,8 @@ type CustomClaims struct {
 	jwt.StandardClaims
 }
 
-func checkScope(scope string, tokenString string) bool {
+// CheckScope -
+func CheckScope(scope, tokenString string) bool {
 	token, _ := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		cert, err := getPemCert(token)
 		if err != nil {
@@ -60,12 +61,10 @@ func checkScope(scope string, tokenString string) bool {
 
 func getPemCert(token *jwt.Token) (string, error) {
 	cert := ""
-	resp, err := http.Get("https://YOUR_DOMAIN/.well-known/jwks.json")
-
+	resp, err := utils.SendWithContext("https://" + os.Getenv("AUTH0_DOMAIN") + "/.well-known/jwks.json")
 	if err != nil {
 		return cert, err
 	}
-	defer resp.Body.Close()
 
 	var jwks = Jwks{}
 	err = json.NewDecoder(resp.Body).Decode(&jwks)
@@ -81,29 +80,29 @@ func getPemCert(token *jwt.Token) (string, error) {
 	}
 
 	if cert == "" {
-		err := errors.New("Unable to find appropriate key")
+		err := errors.New("unable to find appropriate key")
 		return cert, err
 	}
 
 	return cert, nil
 }
 
-func main() {
+// Validate -
+func Validate() *jwtmiddleware.JWTMiddleware {
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-
 			// Verify 'aud' claim
 			aud := os.Getenv("AUTH0_AUDIENCE")
 			checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
 			if !checkAud {
-				return token, errors.New("Invalid audience")
+				return token, errors.New("invalid audience")
 			}
 
 			// Verify 'iss' claim
 			iss := "https://" + os.Getenv("AUTH0_DOMAIN") + "/"
 			checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
 			if !checkIss {
-				return token, errors.New("Invalid issuer")
+				return token, errors.New("invalid issuer")
 			}
 
 			cert, err := getPemCert(token)
@@ -117,5 +116,5 @@ func main() {
 		SigningMethod: jwt.SigningMethodRS256,
 	})
 
-	log.Println(jwtMiddleware)
+	return jwtMiddleware
 }
