@@ -1,9 +1,10 @@
-package auht0
+package auth0
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -90,8 +91,12 @@ func getPemCert(token *jwt.Token) (string, error) {
 	return cert, nil
 }
 
-// Validate -
-func Validate() *jwtmiddleware.JWTMiddleware {
+func extractToken(request utils.Request) string {
+	return request.Headers["Authorization"]
+}
+
+// Authorization -
+func Authorization(handleFunc func()) {
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 			// Verify 'aud' claim
@@ -119,5 +124,5 @@ func Validate() *jwtmiddleware.JWTMiddleware {
 		SigningMethod: jwt.SigningMethodRS256,
 	})
 
-	return jwtMiddleware
+	fmt.Printf("%T", jwtMiddleware)
 }
