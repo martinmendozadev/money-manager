@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/martinmendozadev/money-manager/src/auth0"
 	"github.com/martinmendozadev/money-manager/src/models"
 	"github.com/martinmendozadev/money-manager/src/utils"
 )
@@ -42,5 +43,5 @@ func GetUser(request utils.Request) (utils.Response, error) {
 }
 
 func main() { // nolint:typecheck
-	utils.Start(GetUser)
+	auth0.Authorization(utils.Start(GetUser))
 }
